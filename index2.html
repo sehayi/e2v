@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta id="meta-description" name="description" content="Easily convert your Excel contacts list (.xlsx, .xls) to a VCF (vCard) file. Free, in-browser, multi-language tool. No upload required.">
+    <meta id="meta-keywords" name="keywords" content="excel to vcf, vcf converter, excel to vcard, contacts, convert contacts, xlsx to vcf, vcard generator, free tool, javascript">
+    
+    <title>Excel to VCF Converter</title> 
+    
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='15' fill='%232ecc71'/%3E%3Ccircle cx='50' cy='40' r='15' fill='white'/%3E%3Crect x='30' y='60' width='40' height='30' rx='10' fill='white'/%3E%3C/svg%3E">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        /* 修复盒模型 */
+        html {
+            box-sizing: border-box;
+        }
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            flex-direction: column; /* 更改为列布局以容纳页脚 */
+            justify-content: center;
+            align-items: center; 
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem 0;
+        }
+
+        /* 将 .container 设为主要内容 */
+        .main-content {
+            flex-grow: 1; /* 占据可用空间，将页脚推到底部 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 1rem 0;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            width: 90%; 
+            max-width: 600px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+            line-height: 1.2;
+        }
+
+        p {
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .instructions {
+            text-align: left;
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        .instructions strong {
+            color: #c0392b;
+        }
+        
+        .template-download {
+            margin-top: 15px;
+            border-top: 1px solid #dce4e6;
+            padding-top: 12px;
+            font-size: 0.95rem;
+        }
+        
+        .template-download a {
+            font-weight: bold;
+            color: #2980b9;
+            text-decoration: none;
+        }
+        .template-download a:hover {
+            text-decoration: underline;
+        }
+
+
+        .file-upload-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            border: 2px dashed #3498db;
+            border-radius: 8px;
+            padding: 2rem;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+            width: 100%;
+        }
+
+        .file-upload-wrapper:hover {
+            background-color: #f0f9ff;
+            border-color: #2980b9;
+        }
+
+        #fileInput {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        #fileName {
+            margin-top: 1rem;
+            font-weight: bold;
+            color: #34495e;
+            word-break: break-all;
+        }
+
+        .download-button {
+            display: none; 
+            background-color: #2ecc71;
+            color: white;
+            padding: 12px 25px; 
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            transition: background-color 0.3s;
+            max-width: 100%; 
+            white-space: normal;
+            word-break: break-word; 
+            line-height: 1.4;
+        }
+
+        .download-button:hover {
+            background-color: #27ae60;
+        }
+
+        .lang-switcher {
+            margin-top: 2.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #ecf0f1;
+            font-size: 0.85rem;
+            line-height: 1.7;
+            word-wrap: break-word;
+        }
+        .lang-switcher a {
+            color: #3498db;
+            text-decoration: none;
+            margin: 0 4px;
+            padding: 3px 5px;
+            border-radius: 4px;
+        }
+        .lang-switcher a:hover {
+            background-color: #f0f9ff;
+            text-decoration: underline;
+        }
+        .lang-switcher a.active {
+            font-weight: bold;
+            color: #2c3e50;
+            background-color: #e0eaf1;
+        }
+        
+        /* --- 【新增】页脚样式 --- */
+        footer {
+            flex-shrink: 0; /* 防止页脚收缩 */
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.85rem;
+            color: #95a5a6;
+            width: 100%;
+        }
+        #footer-nav {
+            display: flex;
+            flex-wrap: wrap; /* 移动端自动换行 */
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem 1rem; /* 垂直和水平间距 */
+        }
+        #footer-nav a {
+            color: #7f8c8d;
+            text-decoration: none;
+        }
+        #footer-nav a:hover {
+            text-decoration: underline;
+        }
+        
+        /* --- 【新增】模态框 (Modal) 样式 --- */
+        #modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 998;
+        }
+        #modal-box {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            border-radius: 12px;
+            padding: 1.5rem 2rem 2rem 2rem;
+            width: 90%;
+            max-width: 600px;
+            z-index: 999;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            max-height: 80vh; 
+            overflow-y: auto; 
+        }
+        #modal-title {
+            font-size: 1.5rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+        #modal-content {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #333;
+        }
+        #modal-content p, #modal-content ul {
+            margin-bottom: 1rem;
+        }
+        /* 突出显示隐私政策中的关键信息 */
+        #modal-content strong { 
+            color: #c0392b; 
+        }
+        #modal-close {
+            display: block; /* 使其成为块级元素 */
+            margin: 1.5rem auto 0 auto; /* 顶部外边距，自动水平居中 */
+            padding: 10px 25px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        #modal-close:hover {
+            background: #2980b9;
+        }
+        
+
+        /* 移动端适配 */
+        @media (max-width: 600px) {
+            body {
+                align-items: flex-start; 
+                padding: 0;
+                justify-content: flex-start; /* 从顶部开始 */
+            }
+            
+            .main-content {
+                padding: 0;
+                flex-grow: 1; /* 确保内容至少占满一屏 */
+            }
+
+            .container {
+                width: 100%;
+                min-height: calc(100vh - 80px); /* 减去页脚的大致高度，确保内容填满 */
+                padding: 1.5rem; 
+                border-radius: 0;
+                box-shadow: none;
+            }
+            h1 { font-size: 1.75rem; }
+            p { font-size: 0.9rem; }
+            .instructions { padding: 12px; }
+            .file-upload-wrapper { padding: 1.5rem; }
+
+            .download-button {
+                width: 100%;
+            }
+            
+            footer {
+                padding: 1rem 0.5rem 1.5rem 0.5rem; /* 增加底部 padding */
+                font-size: 0.8rem;
+            }
+            
+            #footer-nav {
+                gap: 0.25rem 0.75rem; /* 减小移动端间距 */
+            }
+
+            .lang-switcher { font-size: 0.9rem; }
+            .lang-switcher a {
+                padding: 6px 8px; 
+                margin: 2px 2px;
+                display: inline-block;
+            }
+            
+            /* 移动端模态框样式 */
+            #modal-box {
+                width: 95%;
+                top: auto; /* 移除垂直居中 */
+                left: 2.5%;
+                bottom: 2.5%;
+                transform: none; /* 移除 transform */
+                max-height: 75vh;
+                padding: 1.5rem;
+            }
+            #modal-close {
+                width: 100%; /* 关闭按钮在移动端全宽 */
+            }
+        }
+
+        /* 针对非常小的屏幕 */
+        @media (max-width: 360px) {
+            .container { padding: 1rem; }
+            h1 { font-size: 1.6rem; }
+            .instructions { font-size: 0.85rem; }
+            .template-download { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-content">
+        <div class="container">
+            <h1 id="main-title"></h1>
+            <p id="subtitle"></p>
+
+            <div class="instructions">
+                <strong id="instructions-title"></strong>
+                <ul>
+                    <li id="inst-1"></li>
+                    <li id="inst-2"></li>
+                    <li id="inst-3"></li>
+                    <li id="inst-4"></li>
+                    <li id="inst-5"></li>
+                    <li id="inst-6"></li>
+                </ul>
+                <div class="template-download">
+                    <a href="#" id="download-template-link" download="contacts_template.xlsx"></a>
+                </div>
+            </div>
+
+            <div class="file-upload-wrapper">
+                <label for="fileInput" id="upload-label"></label>
+                <input type="file" id="fileInput" accept=".xlsx, .xls">
+            </div>
+            <div id="fileName"></div>
+
+            <a id="downloadLink" class="download-button" download="contacts.vcf"></a>
+
+            <div class="lang-switcher" id="lang-switcher">
+                <a href="#" data-lang="de">Deutsch</a> &bull;
+                <a href="#" data-lang="en">English</a> &bull;
+                <a href="#" data-lang="es">Español</a> &bull;
+                <a href="#" data-lang="fr">Français</a> &bull;
+                <a href="#" data-lang="it">Italiano</a> &bull;
+                <a href="#" data-lang="nl">Nederlands</a> &bull;
+                <a href="#" data-lang="pl">Polski</a> &bull;
+                <a href="#" data-lang="pt">Português</a> &bull;
+                <a href="#" data-lang="ru">Русский</a> &bull;
+                <a href="#" data-lang="zh">中文</a> &bull;
+                <a href="#" data-lang="ja">日本語</a> &bull;
+                <a href="#" data-lang="ko">한국어</a>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <nav id="footer-nav">
+            <a href="#" id="footer-copyright" data-modal="copyright"></a>
+            <a href="#" id="footer-about" data-modal="about"></a>
+            <a href="#" id="footer-feedback" data-modal="feedback"></a>
+            <a href="#" id="footer-privacy" data-modal="privacy"></a>
+            <a href="#" id="footer-terms" data-modal="terms"></a>
+        </nav>
+    </footer>
+
+    <div id="modal-overlay"></div>
+    <div id="modal-box">
+        <h2 id="modal-title"></h2>
+        <div id="modal-content"></div>
+        <button id="modal-close" type="button"></button> </div>
+
+    
+    <script>
+        // --- 1. 翻译词典 (已为所有语言添加页脚和模态框内容) ---
+        const translations = {
+            'en': {
+                title: "Excel to VCF Converter",
+                metaDescription: "Easily convert your Excel contacts list (.xlsx, .xls) to a VCF (vCard) file. Free, in-browser, multi-language tool. No upload required.",
+                metaKeywords: "excel to vcf, vcf converter, excel to vcard, contacts, convert contacts, xlsx to vcf, vcard generator, free tool, javascript",
+                mainTitle: "Excel to VCF Converter",
+                subtitle: "Upload your contacts Excel file to generate a VCF file.",
+                instructionsTitle: "Important:",
+                inst1: "Please ensure data starts from <strong>Row 2</strong> (Row 1 should be the header).",
+                inst2: "The program will read columns in this fixed order:",
+                inst3: "<strong>Column A (1st):</strong> Name (Required)",
+                inst4: "<strong>Column B (2nd):</strong> Mobile Phone",
+                inst5: "<strong>Column C (3rd):</strong> Email",
+                inst6: "<strong>Column D (4th):</strong> Organization/Company",
+                uploadLabel: "Click or drag to upload .xlsx / .xls file",
+                fileNone: "No file selected",
+                fileSelected: "Selected: {0}",
+                downloadButton: "Download {0} contacts.vcf",
+                alertReadError: "File reading failed!",
+                alertNoData: "No valid data found in the Excel. Please check if the file format matches the instructions.",
+                templateLinkText: "Download Excel Template (.xlsx)",
+                headerName: "Name (Required)",
+                headerPhone: "Mobile Phone",
+                headerEmail: "Email",
+                headerOrg: "Organization",
+                // 新增页脚和模态框翻译
+                footerCopyright: "© 2025 Excel-VCF",
+                footerAbout: "About",
+                footerFeedback: "Send Feedback",
+                footerPrivacy: "Privacy",
+                footerTerms: "Terms of Service",
+                modalClose: "Close",
+                copyrightTitle: "Copyright",
+                copyrightContent: "<p>© 2025 Excel to VCF Converter. All rights reserved.</p><p>The SheetJS (xlsx.js) library is used under its respective open-source license.</p>",
+                aboutTitle: "About This Tool",
+                aboutContent: "<p>This tool allows you to quickly convert an Excel contact list (.xlsx or .xls) into a standard VCF (vCard) file, which can be imported into mobile phones and contact managers.</p><p><strong>This is a 100% client-side tool.</strong> This means all data conversion happens locally in your browser. No files are ever uploaded to any server.</p>",
+                feedbackTitle: "Send Feedback",
+                feedbackContent: "<p>Have suggestions or found a bug? We'd love to hear from you!</p><p>Please send an email to: <strong>e2v@txxiu.com</strong></p>",
+                privacyTitle: "Privacy Policy",
+                privacyContent: "<p><strong>Your privacy is our top priority.</strong></p><p>This webpage operates on a principle of <strong>zero data collection</strong>.</p><ul><li><strong>No Data Uploaded:</strong> Your Excel files and contact data <strong>NEVER</strong> leave your computer. They are not uploaded, transferred, or sent to any server.</li><li><strong>Local Processing:</strong> All conversion logic runs entirely within your web browser (client-side).</li><li><strong>No Storage:</strong> We do not store, save, or log any part of your contact list. Once you close the browser tab, all data is gone.</li></ul><p>You can use this tool with complete confidence that your private information remains private.</p>",
+                termsTitle: "Terms of Service",
+                termsContent: "<p>By using this free, in-browser tool, you agree to the following:</p><ul><li><strong>As-Is Service:</strong> This tool is provided 'as-is' without any warranties. While we strive for accuracy, we are not liable for any data loss or errors that may occur during the conversion process.</li><li><strong>No Liability:</strong> Since no data is transmitted to us, we hold no responsibility for your data. You are solely responsible for verifying the accuracy and integrity of your converted VCF files.</li></ul>"
+            },
+            'zh': {
+                title: "Excel 转换为 VCF",
+                metaDescription: "轻松将您的 Excel 联系人列表 (.xlsx, .xls) 转换为 VCF (vCard) 文件。免费、安全、多语言的浏览器工具。无需上传文件。",
+                metaKeywords: "Excel转VCF, VCF转换器, Excel转vCard, 联系人, 转换联系人, xlsx转vcf, vcard生成器, 免费工具, javascript",
+                mainTitle: "Excel 转换为 VCF",
+                subtitle: "上传您的联系人 Excel 文件，生成 VCF 文件。",
+                instructionsTitle: "重要提示：",
+                inst1: "请确保数据从 <strong>第2行</strong> 开始（第1行应为表头）。",
+                inst2: "程序将按以下固定顺序读取列：",
+                inst3: "<strong>A列 (第1列):</strong> 姓名 (必填)",
+                inst4: "<strong>B列 (第2列):</strong> 手机号",
+                inst5: "<strong>C列 (第3列):</strong> 电子邮件",
+                inst6: "<strong>D列 (第4列):</strong> 组织/公司",
+                uploadLabel: "点击或拖拽上传 .xlsx / .xls 文件",
+                fileNone: "未选择文件",
+                fileSelected: "已选择: {0}",
+                downloadButton: "下载 {0} 个联系人.vcf",
+                alertReadError: "文件读取失败！",
+                alertNoData: "未能在 Excel 中找到有效数据。请检查文件格式是否符合说明。",
+                templateLinkText: "下载 Excel 模板 (.xlsx)",
+                headerName: "姓名 (必填)",
+                headerPhone: "手机号",
+                headerEmail: "电子邮件",
+                headerOrg: "组织/公司",
+                // 新增页脚和模态框翻译
+                footerCopyright: "© 2025 Excel-VCF",
+                footerAbout: "关于",
+                footerFeedback: "提供意见",
+                footerPrivacy: "隐私权",
+                footerTerms: "服务条款",
+                modalClose: "关闭",
+                copyrightTitle: "版权",
+                copyrightContent: "<p>© 2025 Excel to VCF 转换器。保留所有权利。</p><p>SheetJS (xlsx.js) 库在其相应的开源许可下使用。</p>",
+                aboutTitle: "关于本工具",
+                aboutContent: "<p>本工具能帮助您将 Excel 联系人列表（.xlsx 或 .xls）快速转换为标准的 VCF (vCard) 文件，以便导入到手机或联系人管理软件中。</p><p><strong>这是一个 100% 的纯客户端工具。</strong></p><p>这意味着所有的数据转换都在您的本地浏览器中完成。您的任何文件或数据都不会被上传到任何服务器。</p>",
+                feedbackTitle: "提供意见",
+                feedbackContent: "<p>有任何建议或发现了程序错误？我们期待您的反馈！</p><p>请发送邮件至：<strong>e2v@txxiu.com</strong></p>",
+                privacyTitle: "隐私权政策",
+                privacyContent: "<p><strong>您的隐私是我们的重中之重。</strong></p><p>本网页遵循<strong>零数据收集</strong>的原则运行。</p><ul><li><strong>绝不上传数据：</strong>您的 Excel 文件和联系人数据<strong>永远不会</strong>离开您的电脑。它们不会被上传、传输或发送到任何服务器。</li><li><strong>本地处理：</strong>所有的转换逻辑完全在您的网络浏览器中（客户端）运行。</li><li><strong>绝不存储：</strong>我们不存储、不保存、也不记录您联系人列表的任何部分。一旦您关闭浏览器标签页，所有数据即会消失。</li></ul><p>您可以完全放心地使用本工具，您的私人信息将保持私密。</p>",
+                termsTitle: "服务条款",
+                termsContent: "<p>使用这个免费的浏览器工具，即表示您同意以下条款：</p><ul><li><strong>“现状”服务：</strong>本工具按“现状”提供，不含任何担保。我们力求准确，但对转换过程中可能发生的任何数据丢失或错误概不负责。</li><li><strong>免责声明：</strong>由于没有数据传输给我们，我们对您的数据不承担任何责任。您应对您转换后的 VCF 文件的准确性和完整性负全部责任。</li></ul>"
+            },
+            'de': {
+                title: "Excel zu VCF Konverter",
+                metaDescription: "Konvertieren Sie Ihre Excel-Kontaktliste (.xlsx, .xls) einfach in eine VCF-Datei (vCard). Kostenloses, browserbasiertes, mehrsprachiges Tool. Kein Upload erforderlich.",
+                metaKeywords: "excel zu vcf, vcf konverter, excel zu vcard, kontakte, kontakte konvertieren, xlsx zu vcf, vcard generator, kostenloses tool",
+                mainTitle: "Excel zu VCF Konverter",
+                subtitle: "Laden Sie Ihre Kontakte-Excel-Datei hoch, um eine VCF-Datei zu erstellen.",
+                instructionsTitle: "Wichtig:",
+                inst1: "Stellen Sie sicher, dass die Daten ab <strong>Zeile 2</strong> beginnen (Zeile 1 sollte die Kopfzeile sein).",
+                inst2: "Das Programm liest die Spalten in dieser festgelegten Reihenfolge:",
+                inst3: "<strong>Spalte A (1.):</strong> Name (Erforderlich)",
+                inst4: "<strong>Spalte B (2.):</strong> Mobiltelefon",
+                inst5: "<strong>Spalte C (3.):</strong> E-Mail",
+                inst6: "<strong>Spalte D (4.):</strong> Organisation/Firma",
+                uploadLabel: "Klicken oder ziehen Sie eine .xlsx / .xls Datei hierher",
+                fileNone: "Keine Datei ausgewählt",
+                fileSelected: "Ausgewählt: {0}",
+                downloadButton: "{0} Kontakte.vcf herunterladen",
+                alertReadError: "Fehler beim Lesen der Datei!",
+                alertNoData: "Keine gültigen Daten in der Excel-Datei gefunden. Bitte prüfen Sie das Dateiformat.",
+                templateLinkText: "Excel-Vorlage herunterladen (.xlsx)",
+                headerName: "Name (Erforderlich)",
+                headerPhone: "Mobiltelefon",
+                headerEmail: "E-Mail",
+                headerOrg: "Organisation",
+                // Neu
+                footerCopyright: "© 2025 Excel-VCF",
+                footerAbout: "Über",
+                footerFeedback: "Feedback senden",
+                footerPrivacy: "Datenschutz",
+                footerTerms: "Nutzungsbedingungen",
+                modalClose: "Schließen",
+                copyrightTitle: "Copyright",
+                copyrightContent: "<p>© 2025 Excel zu VCF Konverter. Alle Rechte vorbehalten.</p>",
+                aboutTitle: "Über dieses Tool",
+                aboutContent: "<p>Dieses Tool wandelt Excel-Kontaktlisten (.xlsx) in VCF (vCard)-Dateien um.</p><p><strong>Dies ist ein 100% clientseitiges Tool.</strong> Alle Konvertierungen finden lokal in Ihrem Browser statt. Es werden keine Dateien auf einen Server hochgeladen.</p>",
+                feedbackTitle: "Feedback senden",
+                feedbackContent: "<p>Haben Sie Vorschläge oder einen Fehler gefunden?</p><p>Bitte senden Sie eine E-Mail an: <strong>e2v@txxiu.com</strong></p>",
+                privacyTitle: "Datenschutz-Bestimmungen",
+                privacyContent: "<p><strong>Ihr Datenschutz hat oberste Priorität.</strong></p><p>Diese Webseite sammelt <strong>keine Daten</strong>.</p><ul><li><strong>Kein Daten-Upload:</strong> Ihre Excel-Dateien und Kontaktdaten <strong>VERLASSEN NIEMALS</strong> Ihren Computer. Sie werden nicht auf Server hochgeladen.</li><li><strong>Lokale Verarbeitung:</strong> Die gesamte Konvertierung läuft ausschließlich in Ihrem Webbrowser (clientseitig).</li><li><strong>Keine Speicherung:</strong> Wir speichern keine Teile Ihrer Kontaktliste.</li></ul><p>Sie können dieses Tool mit vollem Vertrauen nutzen.</p>",
+                termsTitle: "Nutzungsbedingungen",
+                termsContent: "<p>Durch die Nutzung dieses Tools stimmen Sie zu:</p><ul><li><strong>Bereitstellung &quot;wie besehen&quot;:</strong> Das Tool wird ohne Gewährleistung bereitgestellt. Wir haften nicht für Datenverluste oder Fehler.</li><li><strong>Keine Haftung:</strong> Da keine Daten an uns übermittelt werden, tragen wir keine Verantwortung für Ihre Daten.</li></ul>"
+            },
+            'es': {
+                title: "Convertidor de Excel a VCF",
+                metaDescription: "Convierta fácilmente su lista de contactos de Excel (.xlsx, .xls) a un archivo VCF (vCard). Herramienta gratuita, multilingüe y en el navegador. No requiere carga.",
+                metaKeywords: "excel a vcf, convertidor vcf, excel a vcard, contactos, convertir contactos, xlsx a vcf, generador vcard, herramienta gratuita",
+                mainTitle: "Convertidor de Excel a VCF",
+                subtitle: "Cargue su archivo Excel de contactos para generar un archivo VCF.",
+                instructionsTitle: "Importante:",
+                inst1: "Asegúrese de que los datos comiencen desde la <strong>Fila 2</strong> (La Fila 1 debe ser el encabezado).",
+                inst2: "El programa leerá las columnas en este orden fijo:",
+                inst3: "<strong>Columna A (1ª):</strong> Nombre (Requerido)",
+                inst4: "<strong>Columna B (2ª):</strong> Teléfono Móvil",
+                inst5: "<strong>Columna C (3ª):</strong> Correo Electrónico",
+                inst6: "<strong>Columna D (4ª):</strong> Organización/Empresa",
+                uploadLabel: "Haga clic o arrastre para cargar el archivo .xlsx / .xls",
+                fileNone: "No se ha seleccionado ningún archivo",
+                fileSelected: "Seleccionado: {0}",
+                downloadButton: "Descargar {0} contactos.vcf",
+                alertReadError: "¡Error al leer el archivo!",
+                alertNoData: "No se encontraron datos válidos en el Excel. Verifique si el formato del archivo coincide con las instrucciones.",
+                templateLinkText: "Descargar Plantilla de Excel (.xlsx)",
+                headerName: "Nombre (Requerido)",
+                headerPhone: "Teléfono Móvil",
+                headerEmail: "Correo Electrónico",
+                headerOrg: "Organización",
+                // Neu
+                footerCopyright: "© 2025 Excel-VCF",
+                footerAbout: "Acerca de",
+                footerFeedback: "Enviar comentarios",
+                footerPrivacy: "Privacidad",
+                footerTerms: "Términos de servicio",
+                modalClose: "Cerrar",
+                copyrightTitle: "Copyright",
+                copyrightContent: "<p>© 2025 Convertidor de Excel a VCF. Todos los derechos reservados.</p>",
+                aboutTitle: "Acerca de esta herramienta",
+                aboutContent: "<p>Esta herramienta convierte listas de contactos de Excel (.xlsx) a archivos VCF (vCard).</p><p><strong>Esta es una herramienta 100% del lado del cliente.</strong> Toda la conversión ocurre localmente en su navegador. No se cargan archivos a ningún servidor.</p>",
+                feedbackTitle: "Enviar comentarios",
+                feedbackContent: "<p>¿Tiene sugerencias o ha encontrado un error?</p><p>Envíe un correo electrónico a: <strong>e2v@txxiu.com</strong></p>",
+                privacyTitle: "Política de Privacidad",
+                privacyContent: "<p><strong>Su privacidad es nuestra máxima prioridad.</strong></p><p>Esta página web opera bajo el principio de <strong>cero recolección de datos</strong>.</p><ul><li><strong>Sin carga de datos:</strong> Sus archivos de Excel y datos de contacto <strong>NUNCA</strong> salen de su computadora. No se cargan a ningún servidor.</li><li><strong>Procesamiento local:</strong> Toda la lógica de conversión se ejecuta íntegramente en su navegador web (lado del cliente).</li><li><strong>Sin almacenamiento:</strong> No almacenamos ni guardamos ninguna parte de su lista de contactos.</li></ul><p>Puede usar esta herramienta con total confianza.</p>",
+                termsTitle: "Términos de servicio",
+                termsContent: "<p>Al utilizar esta herramienta gratuita, usted acepta:</p><ul><li><strong>Servicio \"tal cual\":</strong> La herramienta se proporciona \"tal cual\", sin garantías. No somos responsables de la pérdida de datos o errores.</li><li><strong>Sin responsabilidad:</strong> Dado que no se nos transmiten datos, no tenemos ninguna responsabilidad sobre sus datos.</li></ul>"
+            },
+            'fr': {
+                title: "Convertisseur Excel vers VCF",
+                metaDescription: "Convertissez facilement votre liste de contacts Excel (.xlsx, .xls) en fichier VCF (vCard). Outil gratuit, multilingue et fonctionnant dans le navigateur. Aucun téléchargement requis.",
+                metaKeywords: "excel vers vcf, convertisseur vcf, excel vers vcard, contacts, convertir contacts, xlsx vers vcf, générateur vcard, outil gratuit",
+                mainTitle: "Convertisseur Excel vers VCF",
+                subtitle: "Téléchargez votre fichier Excel de contacts pour générer un fichier VCF.",
+                instructionsTitle: "Important :",
+                inst1: "Assurez-vous que les données commencent à partir de la <strong>Ligne 2</strong> (La Ligne 1 doit être l'en-tête).",
+                inst2: "Le programme lira les colonnes dans cet ordre fixe :",
+                inst3: "<strong>Colonne A (1ère) :</strong> Nom (Requis)",
+                inst4: "<strong>Colonne B (2ème) :</strong> Téléphone Portable",
+                inst5: "<strong>Colonne C (3ème) :E-mail",
+                inst6: "<strong>Colonne D (4ème) :</strong> Organisation/Entreprise",
+                uploadLabel: "Cliquez ou glissez pour charger un fichier .xlsx / .xls",
+                fileNone: "Aucun fichier sélectionné",
+                fileSelected: "Sélectionné : {0}",
+                downloadButton: "Télécharger {0} contacts.vcf",
+                alertReadError: "Échec de la lecture du fichier !",
+                alertNoData: "Aucune donnée valide trouvée dans le fichier Excel. Veuillez vérifier le format.",
+                templateLinkText: "Télécharger le modèle Excel (.xlsx)",
+                headerName: "Nom (Requis)",
+                headerPhone: "Téléphone Portable",
+                headerEmail: "E-mail",
+                headerOrg: "Organisation",
+                // Neu
+                footerCopyright: "© 2025 Excel-VCF",
+                footerAbout: "À propos",
+                footerFeedback: "Envoyer des commentaires",
+                footerPrivacy: "Confidentialité",
+                footerTerms: "Conditions d'utilisation",
+                modalClose: "Fermer",
+                copyrightTitle: "Copyright",
+                copyrightContent: "<p>© 2025 Convertisseur Excel vers VCF. Tous droits réservés.</p>",
+                aboutTitle: "À propos de cet outil",
+                aboutContent: "<p>Cet outil convertit les listes de contacts Excel (.xlsx) en fichiers VCF (vCard).</p><p><strong>C'est un outil 100% côté client.</strong> Toute la conversion se fait localement dans votre navigateur. Aucun fichier n'est téléversé sur un serveur.</p>",
+                feedbackTitle: "Envoyer des commentaires",
+                feedbackContent: "<p>Avez-vous des suggestions ou trouvé un bug ?</p><p>Envoyez un e-mail à : <strong>e2v@txxiu.com</strong></p>",
+                privacyTitle: "Politique de confidentialité",
+                privacyContent: "<p><strong>Votre vie privée est notre priorité absolue.</strong></p><p>Cette page Web fonctionne sur le principe de <strong>zéro collecte de données</strong>.</p><ul><li><strong>Aucune donnée téléversée :</strong> Vos fichiers Excel et vos données de contact <strong>NE quittent JAMAIS</strong> votre ordinateur.</li><li><strong>Traitement local :</strong> Toute la logique de conversion s'exécute entièrement dans votre navigateur Web (côté client).</li><li><strong>Pas de stockage :</strong> Nous ne stockons aucune partie de votre liste de contacts.</li></ul><p>Utilisez cet outil en toute confiance.</p>",
+                termsTitle: "Conditions d'utilisation",
+                termsContent: "<p>En utilisant cet outil gratuit, vous acceptez :</p><ul><li><strong>Service &quot;en l'état&quot; :</strong> L'outil est fourni &quot;en l'état&quot;, sans garanties. Nous ne sommes pas responsables des pertes de données.</li><li><strong>Aucune responsabilité :</strong> Aucune donnée n'étant transmise, nous n'avons aucune responsabilité pour vos données.</li></ul>"
+            },
+            'it': {
+                title: "Convertitore da Excel a VCF",
+                metaDescription: "Converti facilmente il tuo elenco di contatti Excel (.xlsx, .xls) in un file VCF (vCard). Strumento gratuito, multilingue e basato su browser. Nessun caricamento richiesto.",
+                metaKeywords: "excel a vcf, convertitore vcf, excel a vcard, contatti, converti contatti, xlsx a vcf, generatore vcard, strumento gratuito",
+                mainTitle: "Convertitore da Excel a VCF",
+                subtitle: "Carica il tuo file Excel di contatti per generare un file VCF.",
+                instructionsTitle: "Importante:",
+                inst1: "Assicurati che i dati inizino dalla <strong>Riga 2</strong> (La Riga 1 dovrebbe essere l'intestazione).",
+                inst2: "Il programma leggerà le colonne in questo ordine fisso:",
+                inst3: "<strong>Colonna A (1a):</strong> Nome (Obbligatorio)",
+                inst4: "<strong>Colonna B (2a):</strong> Cellulare",
+                inst5: "<strong>Colonna C (3a):</strong> Email",
+                inst6: "<strong>Columna D (4a):</strong> Organizzazione/Azienda",
+                uploadLabel: "Fai clic o trascina per caricare file .xlsx / .xls",
+                fileNone: "Nessun file selezionato",
+                fileSelected: "Selezionato: {0}",
+                downloadButton: "Scarica {0} contatti.vcf",
+                alertReadError: "Lettura file non riuscita!",
+                alertNoData: "Nessun dato valido trovato nel file Excel. Controlla il formato.",
+                templateLinkText: "Scarica modello Excel (.xlsx)",
+                headerName: "Nome (Obbligatorio)",
+                headerPhone: "Cellulare",
+                headerEmail: "Email",
+                headerOrg: "Organizzazione",
+                // Neu
+                footerCopyright: "© 2025 Excel-VCF",
+                footerAbout: "Informazioni",
+                footerFeedback: "Invia feedback",
+                footerPrivacy: "Privacy",
+                footerTerms: "Termini di servizio",
+                modalClose: "Chiudi",
+                copyrightTitle: "Copyright",
+                copyrightContent: "<p>© 2025 Convertitore da Excel a VCF. Tutti i diritti riservati.</p>",
+                aboutTitle: "Informazioni su questo strumento",
+                aboutContent: "<p>Questo strumento converte gli elenchi di contatti Excel (.xlsx) in file VCF (vCard).</p><p><strong>Questo è uno strumento 100% lato client.</strong> Tutta la conversione avviene localmente nel tuo browser. Nessun file viene caricato su un server.</p>",
+                feedbackTitle: "Invia feedback",
+                feedbackContent: "<p>Hai suggerimenti o hai trovato un bug?</p><p>Invia un'e-mail a: <strong>e2v@txxiu.com</strong></p>",
+                privacyTitle: "Informativa sulla privacy",
+                privacyContent: "<p><strong>La tua privacy è la nostra massima priorità.</strong></p><p>Questa pagina web opera secondo il principio della <strong>raccolta zero di dati</strong>.</p><ul><li><strong>Nessun dato caricato:</strong> I tuoi file Excel e i dati dei contatti <strong>NON lasciano MAI</strong> il tuo computer.</li><li><strong>Elaborazione locale:</strong> Tutta la logica di conversione viene eseguita interamente nel tuo browser web (lato client).</li><li><strong>Nessuna archiviazione:</strong> Non archiviamo nessuna parte del tuo elenco di contatti.</li></ul><p>Puoi usare questo strumento con la massima tranquillità.</p>",
+                termsTitle: "Termini di servizio",
+                termsContent: "<p>Utilizzando questo strumento gratuito, accetti quanto segue:</p><ul><li><strong>Servizio \"così com'è\":</strong> Lo strumento è fornito \"così com'è\", senza garanzie. Non siamo responsabili per la perdita di dati.</li><li><strong>Nessuna responsabilità:</strong> Poiché non ci vengono trasmessi dati, non abbiamo alcuna responsabilità per i tuoi dati.</li></ul>"
+            },
+            'nl': {
+                title: "Excel naar VCF Converter",
+                metaDescription: "Converteer eenvoudig uw Excel-contactenlijst (.xlsx, .xls) naar een VCF (vCard) bestand. Gratis, in-browser, meertalige tool. Geen upload vereist.",
+                metaKeywords: "excel naar vcf, vcf converter, excel naar vcard, contacten, contacten converteren, xlsx naar vcf, vcard generator, gratis tool",
+                mainTitle: "Excel naar VCF Converter",
+                subtitle: "Upload uw Excel-contactenbestand om een VCF-bestand te genereren.",
+                instructionsTitle: "Belangrijk:",
+                inst1: "Zorg ervoor dat de gegevens beginnen vanaf <strong>Rij 2</strong> (Rij 1 moet de koptekst zijn).",
+                inst2: "Het programma leest kolommen in deze vaste volgorde:",
+                inst3: "<strong>Kolom A (1e):</strong> Naam (Verplicht)",
+                inst4: "<strong>Kolom B (2e):</strong> Mobiele Telefoon",
+                inst5: "<strong>Kolom C (3e):</strong> E-mail",
+                inst6: "<strong>Kolom D (4e):</strong> Organisatie/Bedrijf",
+                uploadLabel: "Klik of sleep om .xlsx / .xls bestand te uploaden",
+                fileNone: "Geen bestand geselecteerd",
+                fileSelected: "Geselecteerd: {0}",
+                downloadButton: "Download {0} contacten.vcf",
+                alertReadError: "Bestand lezen mislukt!",
+                alertNoData: "Geen geldige gegevens gevonden in Excel. Controleer het bestandsformaat.",
+                templateLinkText: "Excel-sjabloon downloaden (.xlsx)",
+                headerName: "Naam (Verplicht)",
+                headerPhone: "Mobiele Telefoon",
+                headerEmail: "E-mail",
+                headerOrg: "Organisatie",
+                // Neu
+                footerCopyright: "© 2025 Excel-VCF",
+                footerAbout: "Over",
+                footerFeedback: "Feedback sturen",
+                footerPrivacy: "Privacy",
+                footerTerms: "Servicevoorwaarden",
+                modalClose: "Sluiten",
+                copyrightTitle: "Copyright",
+                copyrightContent: "<p>© 2025 Excel naar VCF Converter. Alle rechten voorbehouden.</p>",
+                aboutTitle: "Over deze tool",
+                aboutContent: "<p>Deze tool converteert Excel-contactlijsten (.xlsx) naar VCF (vCard)-bestanden.</p><p><strong>Dit is een 100% client-side tool.</strong> Alle conversie vindt lokaal in uw browser plaats. Er worden geen bestanden geüpload naar een server.</p>",
+                feedbackTitle: "Feedback sturen",
+                feedbackContent: "<p>Heeft u suggesties of een bug gevonden?</p><p>Stuur een e-mail naar: <strong>e2v@txxiu.com</strong></p>",
+                privacyTitle: "Privacybeleid",
+                privacyContent: "<p><strong>Uw privacy is onze topprioriteit.</strong></p><p>Deze webpagina werkt volgens het principe van <strong>nul gegevensverzameling</strong>.</p><ul><li><strong>Geen gegevens geüpload:</strong> Uw Excel-bestanden en contactgegevens <strong>VERLATEN NOOIT</strong> uw computer.</li><li><strong>Lokale verwerking:</strong> Alle conversielogica draait volledig binnen uw webbrowser (client-side).</li><li><strong>Geen opslag:</strong> We slaan geen enkel deel van uw contactenlijst op.</li></ul><p>U kunt deze tool met het volste vertrouwen gebruiken.</p>",
+                termsTitle: "Servicevoorwaarden",
+                termsContent: "<p>Door deze gratis tool te gebruiken, gaat u akkoord met:</p><ul><li><strong>Service \"as-is\":</strong> De tool wordt geleverd \"as-is\", zonder garanties. Wij zijn niet aansprakelijk voor gegevensverlies.</li><li><strong>Geen aansprakelijkheid:</strong> Aangezien er geen gegevens naar ons worden verzonden, dragen wij geen verantwoordelijkheid voor uw gegevens.</li></ul>"
+            },
+            'pl': {
+                title: "Konwerter Excel do VCF",
+                metaDescription: "Łatwo konwertuj listę kontaktów Excel (.xlsx, .xls) do pliku VCF (vCard). Darmowe, wielojęzyczne narzędzie działające w przeglądarce. Nie wymaga przesyłania.",
+                metaKeywords: "excel do vcf, konwerter vcf, excel do vcard, kontakty, konwertuj kontakty, xlsx do vcf, generator vcard, darmowe narzędzie",
+                mainTitle: "Konwerter Excel do VCF",
+                subtitle: "Prześlij plik Excel z kontaktami, aby wygenerować plik VCF.",
+                instructionsTitle: "Ważne:",
+                inst1: "Upewnij się, że dane zaczynają się od <strong>Wiersza 2</strong> (Wiersz 1 powinien być nagłówkiem).",
+                inst2: "Program odczyta kolumny w tej stałej kolejności:",
+                inst3: "<strong>Kolumna A (1.):</strong> Imię i nazwisko (Wymagane)",
+                inst4: "<strong>Kolumna B (2.):</strong> Telefon komórkowy",
+                inst5: "<strong>Kolumna C (3.):</strong> E-mail",
+                inst6: "<strong>Kolumna D (4ta):</strong> Organizacja/Firma",
+                uploadLabel: "Kliknij lub przeciągnij, aby przesłać plik .xlsx / .xls",
+                fileNone: "Nie wybrano pliku",
+                fileSelected: "Wybrano: {0}",
+                downloadButton: "Pobierz {0} kontaktów.vcf",
+                alertReadError: "Błąd odczytu pliku!",
+                alertNoData: "Nie znaleziono prawidłowych danych w pliku Excel. Sprawdź format.",
+                templateLinkText: "Pobierz szablon Excel (.xlsx)",
+                headerName: "Imię i nazwisko (Wymagane)",
+                headerPhone: "Telefon komórkowy",
+                headerEmail: "E-mail",
+                headerOrg: "Organizacja",
+                // Neu
+                footerCopyright: "© 2025 Excel-VCF",
+                footerAbout: "O programie",
+                footerFeedback: "Prześlij opinię",
+                footerPrivacy: "Prywatność",
+                footerTerms: "Warunki usługi",
+                modalClose: "Zamknij",
+                copyrightTitle: "Prawa autorskie",
+                copyrightContent: "<p>© 2025 Konwerter Excel do VCF. Wszelkie prawa zastrzeżone.</p>",
+                aboutTitle: "O tym narzędziu",
+                aboutContent: "<p>To narzędzie konwertuje listy kontaktów Excel (.xlsx) na pliki VCF (vCard).</p><p><strong>To jest w 100% narzędzie po stronie klienta.</strong> Cała konwersja odbywa się lokalnie w Twojej przeglądarce. Żadne pliki nie są przesyłane na serwer.</p>",
+                feedbackTitle: "Prześlij opinię",
+                feedbackContent: "<p>Masz sugestie lub znalazłeś błąd?</p><p>Wyślij e-mail na adres: <strong>e2v@txxiu.com</strong></p>",
+                privacyTitle: "Polityka prywatności",
+                privacyContent: "<p><strong>Twoja prywatność jest naszym najwyższym priorytetem.</strong></p><p>Ta strona działa na zasadzie <strong>zerowego gromadzenia danych</strong>.</p><ul><li><strong>Żadne dane nie są przesyłane:</strong> Twoje pliki Excel i dane kontaktowe <strong>NIGDY</strong> nie opuszczają Twojego komputera.</li><li><strong>Przetwarzanie lokalne:</strong> Cała logika konwersji działa wyłącznie w Twojej przeglądarce internetowej (po stronie klienta).</li><li><strong>Brak przechowywania:</strong> Nie przechowujemy żadnej części Twojej listy kontaktów.</li></ul><p>Możesz korzystać z tego narzędzia z pełnym zaufaniem.</p>",
+                termsTitle: "Warunki usługi",
+                termsContent: '<p>Korzystając z tego bezpłatnego narzędzia, zgadzasz się na:</p><ul><li><strong>Usługa "taka, jaka jest":</strong> Narzędzie jest dostarczane "takie, jakie jest", bez gwarancji. Nie ponosimy odpowiedzialności za utratę danych.</li><li><strong>Brak odpowiedzialności:</strong> Ponieważ żadne dane nie są do nas przesyłane, nie ponosimy żadnej odpowiedzialności za Twoje dane.</li></ul>'
+            },
+            'pt': {
+                title: "Conversor de Excel para VCF",
+                metaDescription: "Converta facilmente sua lista de contatos do Excel (.xlsx, .xls) para um arquivo VCF (vCard). Ferramenta gratuita, multilíngue e no navegador. Não é necessário fazer upload.",
+                metaKeywords: "excel para vcf, conversor vcf, excel para vcard, contatos, converter contatos, xlsx para vcf, gerador vcard, ferramenta gratuita",
+                mainTitle: "Conversor de Excel para VCF",
+                subtitle: "Carregue seu arquivo Excel de contatos para gerar um arquivo VCF.",
+                instructionsTitle: "Importante:",
+                inst1: "Certifique-se de que os dados comecem na <strong>Linha 2</strong> (A Linha 1 deve ser o cabeçalho).",
+                inst2: "O programa lerá as colunas nesta ordem fixa:",
+                inst3: "<strong>Coluna A (1ª):</strong> Nome (Obrigatório)",
+                inst4: "<strong>Coluna B (2ª):</strong> Celular",
+                inst5: "<strong>Coluna C (3ª):</strong> E-mail",
+                inst6: "<strong>Coluna D (4ª):</strong> Organização/Empresa",
+                uploadLabel: "Clique ou arraste para carregar o arquivo .xlsx / .xls",
+                fileNone: "Nenhum arquivo selecionado",
+                fileSelected: "Selecionado: {0}",
+                downloadButton: "Baixar {0} contatos.vcf",
+                alertReadError: "Falha ao ler o arquivo!",
+                alertNoData: "Nenhum dado válido encontrado no Excel. Verifique o formato do arquivo.",
+                templateLinkText: "Baixar modelo do Excel (.xlsx)",
+                headerName: "Nome (Obrigatório)",
+                headerPhone: "Celular",
+                headerEmail: "E-mail",
+                headerOrg: "Organização",
+                // Neu
+                footerCopyright: "© 2025 Excel-VCF",
+                footerAbout: "Sobre",
+                footerFeedback: "Enviar feedback",
+                footerPrivacy: "Privacidade",
+                footerTerms: "Termos de Serviço",
+                modalClose: "Fechar",
+                copyrightTitle: "Copyright",
+                copyrightContent: "<p>© 2025 Conversor de Excel para VCF. Todos os direitos reservados.</p>",
+                aboutTitle: "Sobre esta ferramenta",
+                aboutContent: "<p>Esta ferramenta converte listas de contatos do Excel (.xlsx) em arquivos VCF (vCard).</p><p><strong>Esta é uma ferramenta 100% do lado do cliente.</strong> Toda a conversão acontece localmente no seu navegador. Nenhum arquivo é enviado para um servidor.</p>",
+                feedbackTitle: "Enviar feedback",
+                feedbackContent: "<p>Tem sugestões ou encontrou um bug?</p><p>Envie um e-mail para: <strong>e2v@txxiu.com</strong></p>",
+                privacyTitle: "Política de Privacidade",
+                privacyContent: "<p><strong>Sua privacidade é nossa prioridade máxima.</strong></p><p>Esta página da web opera sob o princípio de <strong>coleta zero de dados</strong>.</p><ul><li><strong>Nenhum dado enviado:</strong> Seus arquivos Excel e dados de contato <strong>NUNCA</strong> saem do seu computador.</li><li><strong>Processamento local:</strong> Toda a lógica de conversão é executada inteiramente no seu navegador (lado do cliente).</li><li><strong>Sem armazenamento:</strong> Não armazenamos nenhuma parte da sua lista de contatos.</li></ul><p>Você pode usar esta ferramenta com total confiança.</p>",
+                termsTitle: "Termos de Serviço",
+                termsContent: "<p>Ao usar esta ferramenta gratuita, você concorda com:</p><ul><li><strong>Serviço \"como está\":</strong> A ferramenta é fornecida \"como está\", sem garantias. Não nos responsabilizamos por perda de dados.</li><li><strong>Sem responsabilidade:</strong> Como nenhum dado é transmitido para nós, não temos responsabilidade por seus dados.</li></ul>"
+            },
+            'ru': {
+                title: "Конвертер Excel в VCF",
+                metaDescription: "Легко конвертируйте ваш список контактов Excel (.xlsx, .xls) в файл VCF (vCard). Бесплатный, многоязычный инструмент в браузере. Загрузка не требуется.",
+                metaKeywords: "excel в vcf, конвертер vcf, excel в vcard, контакты, конвертировать контакты, xlsx в vcf, генератор vcard, бесплатный инструмент",
+                mainTitle: "Конвертер Excel в VCF",
+                subtitle: "Загрузите файл Excel с контактами, чтобы создать файл VCF.",
+                instructionsTitle: "Важно:",
+                inst1: "Убедитесь, что данные начинаются со <strong>Строки 2</strong> (Строка 1 должна быть заголовком).",
+                inst2: "Программа читает столбцы в следующем фиксированном порядке:",
+                inst3: "<strong>Столбец A (1-й):</strong> Имя (Обязательно)",
+                inst4: "<strong>Столбец B (2-й):</strong> Мобильный телефон",
+                inst5: "<strong>Столбец C (3-й):</strong> Эл. почта",
+                inst6: "<strong>Столбец D (4t-й):</strong> Организация/Компания",
+                uploadLabel: "Нажмите или перетащите файл .xlsx / .xls для загрузки",
+                fileNone: "Файл не выбран",
+                fileSelected: "Выбрано: {0}",
+                downloadButton: "Скачать {0} контактов.vcf",
+                alertReadError: "Ошибка чтения файла!",
+                alertNoData: "В Excel не найдены допустимые данные. Проверьте формат файла.",
+                templateLinkText: "Скачать шаблон Excel (.xlsx)",
+                headerName: "Имя (Обязательно)",
+                headerPhone: "Мобильный телефон",
+                headerEmail: "Эл. почта",
+                headerOrg: "Организация",
+                // Neu
+                footerCopyright: "© 2025 Excel-VCF",
+                footerAbout: "О проекте",
+                footerFeedback: "Отправить отзыв",
+                footerPrivacy: "Конфиденциальность",
+                footerTerms: "Условия использования",
+                modalClose: "Закрыть",
+                copyrightTitle: "Copyright",
+                copyrightContent: "<p>© 2025 Конвертер Excel в VCF. Все права защищены.</p>",
+                aboutTitle: "Об этом инструменте",
+                aboutContent: "<p>Этот инструмент преобразует списки контактов Excel (.xlsx) в файлы VCF (vCard).</p><p><strong>Это 100% клиентский инструмент.</strong> Все преобразования происходят локально в вашем браузере. Файлы не загружаются на сервер.</p>",
+                feedbackTitle: "Отправить отзыв",
+                feedbackContent: "<p>Есть предложения или нашли ошибку?</p><p>Отправьте письмо по адресу: <strong>e2v@txxiu.com</strong></p>",
+                privacyTitle: "Политика конфиденциальности",
+                privacyContent: "<p><strong>Ваша конфиденциальность - наш главный приоритет.</strong></p><p>Этот веб-сайт работает по принципу <strong>нулевого сбора данных</strong>.</p><ul><li><strong>Данные не загружаются:</strong> Ваши файлы Excel и контактные данные <strong>НИКОГДА</strong> не покидают ваш компьютер.</li><li><strong>Локальная обработка:</strong> Вся логика преобразования выполняется исключительно в вашем веб-браузере (на стороне клиента).</li><li><strong>Без хранения:</strong> Мы не храним никакую часть вашего списка контактов.</li></ul><p>Вы можете использовать этот инструмент с полной уверенностью.</p>",
+                termsTitle: "Условия использования",
+                termsContent: "<p>Используя этот бесплатный инструмент, вы соглашаетесь:</p><ul><li><strong>Сервис \"как есть\":</strong> Инструмент предоставляется \"как есть\", без гарантий. Мы не несем ответственности за потерю данных.</li><li><strong>Без ответственности:</strong> Поскольку нам не передаются никакие данные, мы не несем ответственности за ваши данные.</li></ul>"
+            },
+            'ja': {
+                title: "Excel から VCF への変換",
+                metaDescription: "Excelの連絡先リスト（.xlsx、.xls）をVCF（vCard）ファイルに簡単に変換します。無料、ブラウザで動作、多言語対応ツール。アップロード不要。",
+                metaKeywords: "excel vcf, vcf 変換, excel vcard, 連絡先, 連絡先 変換, xlsx vcf, vcard 生成, 無料ツール",
+                mainTitle: "Excel から VCF への変換",
+                subtitle: "連絡先のExcelファイルをアップロードしてVCFファイルを生成します。",
+                instructionsTitle: "重要：",
+                inst1: "データが<strong>2行目</strong>から始まることを確認してください（1行目はヘッダーである必要があります）。",
+                inst2: "プログラムは、この固定された順序で列を読み取ります：",
+                inst3: "<strong>A列（1番目）：</strong> 名前（必須）",
+                inst4: "<strong>B列（2番目）：</strong> 携帯電話",
+                inst5: "<strong>C列（3番目）：</strong> Eメール",
+                inst6: "<strong>D列（4番目）：</strong> 組織/会社",
+                uploadLabel: ".xlsx / .xls ファイルをクリックまたはドラッグしてアップロード",
+                fileNone: "ファイルが選択されていません",
+                fileSelected: "選択済み: {0}",
+                downloadButton: "{0} 件の連絡先をダウンロード (.vcf)",
+                alertReadError: "ファイルの読み込みに失敗しました！",
+                alertNoData: "Excelに有効なデータが見つかりません。ファイル形式が指示と一致しているか確認してください。",
+                templateLinkText: "Excel テンプレートのダウンロード (.xlsx)",
+                headerName: "名前 (必須)",
+                headerPhone: "携帯電話",
+                headerEmail: "Eメール",
+                headerOrg: "組織/会社",
+                // Neu
+                footerCopyright: "© 2025 Excel-VCF",
+                footerAbout: "概要",
+                footerFeedback: "フィードバック",
+                footerPrivacy: "プライバシー",
+                footerTerms: "利用規約",
+                modalClose: "閉じる",
+                copyrightTitle: "著作権",
+                copyrightContent: "<p>© 2025 Excel VCF 変換. 全著作権所有.</p>",
+                aboutTitle: "このツールについて",
+                aboutContent: "<p>このツールは、Excelの連絡先リスト（.xlsx）をVCF（vCard）ファイルに変換します。</p><p><strong>これは100%クライアントサイドのツールです。</strong>すべての変換はブラウザでローカルに実行されます。ファイルがサーバーにアップロードされることはありません。</p>",
+                feedbackTitle: "フィードバック",
+                feedbackContent: "<p>ご提案やバグ報告はこちらまで：</p><p><strong>e2v@txxiu.com</strong></p>",
+                privacyTitle: "プライバシーポリシー",
+                privacyContent: "<p><strong>お客様のプライバシーは最優先事項です。</strong></p><p>このウェブページは、<strong>データ収集ゼロ</strong>の原則で運営されています。</p><ul><li><strong>データアップロードなし：</strong>お客様のExcelファイルと連絡先データがお客様のコンピュータから離れることは<strong>絶対に</strong>ありません。</li><li><strong>ローカル処理：</strong>すべての変換ロジックは、お客様のウェブブラウザ内（クライアントサイド）で完結します。</li><li><strong>ストレージなし：</strong>連絡先リストのいかなる部分も保存しません。</li></ul><p>安心してこのツールをご利用ください。</p>",
+                termsTitle: "利用規約",
+                termsContent: "<p>この無料ツールを使用することにより、以下に同意したものとみなされます：</p><ul><li><strong>「現状有姿」でのサービス：</strong>本ツールは保証なしで「現状有姿」で提供されます。データ損失について責任を負いません。</li><li><strong>免責：</strong>データは送信されないため、お客様のデータについて一切責任を負いません。</li></ul>"
+            },
+            'ko': {
+                title: "Excel을 VCF로 변환",
+                metaDescription: "Excel 연락처 목록(.xlsx, .xls)을 VCF(vCard) 파일로 쉽게 변환하세요. 브라우저에서 바로 작동하는 무료 다국어 도구입니다. 업로드 필요 없음.",
+                metaKeywords: "excel vcf, vcf 변환기, excel vcard, 연락처, 연락처 변환, xlsx vcf, vcard 생성기, 무료 도구",
+                mainTitle: "Excel을 VCF로 변환",
+                subtitle: "연락처 Excel 파일을 업로드하여 VCF 파일을 생성합니다.",
+                instructionsTitle: "중요:",
+                inst1: "데이터가 <strong>2행</strong>부터 시작하는지 확인하십시오 (1행은 머리글이어야 함).",
+                inst2: "프로그램은 다음 고정된 순서로 열을 읽습니다:",
+                inst3: "<strong>A열 (첫 번째):</strong> 이름 (필수)",
+                inst4: "<strong>B열 (두 번째):</strong> 휴대폰",
+                inst5: "<strong>C열 (세 번째):</strong> 이메일",
+                inst6: "<strong>D열 (네 번째):</strong> 조직/회사",
+                uploadLabel: ".xlsx / .xls 파일을 클릭하거나 드래그하여 업로드",
+                fileNone: "선택된 파일 없음",
+                fileSelected: "선택됨: {0}",
+                downloadButton: "{0}개의 연락처 다운로드 (.vcf)",
+                alertReadError: "파일 읽기 실패!",
+                alertNoData: "Excel에서 유효한 데이터를 찾을 수 없습니다. 파일 형식이 지침과 일치하는지 확인하십시오.",
+                templateLinkText: "Excel 템플릿 다운로드 (.xlsx)",
+                headerName: "이름 (필수)",
+                headerPhone: "휴대폰",
+                headerEmail: "이메일",
+                headerOrg: "조직/회사",
+                // Neu
+                footerCopyright: "© 2025 Excel-VCF",
+                footerAbout: "정보",
+                footerFeedback: "피드백 보내기",
+                footerPrivacy: "개인정보 보호",
+                footerTerms: "서비스 약관",
+                modalClose: "닫기",
+                copyrightTitle: "저작권",
+                copyrightContent: "<p>© 2025 Excel to VCF 변환기. 모든 권리 보유.</p>",
+                aboutTitle: "이 도구에 대하여",
+                aboutContent: "<p>이 도구는 Excel 연락처 목록(.xlsx)을 VCF(vCard) 파일로 변환합니다.</p><p><strong>이것은 100% 클라이언트 측 도구입니다.</strong> 모든 변환은 브라우저에서 로컬로 이루어집니다. 어떤 파일도 서버로 업로드되지 않습니다.</p>",
+                feedbackTitle: "피드백 보내기",
+                feedbackContent: "<p>제안 사항이나 버그를 발견하셨습니까?</p><p><strong>e2v@txxiu.com</strong>으로 이메일을 보내주세요.</p>",
+                privacyTitle: "개인정보 보호 정책",
+                privacyContent: "<p><strong>귀하의 개인 정보는 우리의 최우선 과제입니다.</strong></p><p>이 웹페이지는 <strong>데이터 수집 제로</strong> 원칙에 따라 운영됩니다.</p><ul><li><strong>데이터 업로드 없음:</strong> 귀하의 Excel 파일과 연락처 데이터는 <strong>절대로</strong> 귀하의 컴퓨터를 떠나지 않습니다.</li><li><strong>로컬 처리:</strong> 모든 변환 로직은 전적으로 귀하의 웹 브라우저(클라이언트 측) 내에서 실행됩니다.</li><li><strong>저장 공간 없음:</strong> 귀하의 연락처 목록의 어떤 부분도 저장하지 않습니다.</li></ul><p>안심하고 이 도구를 사용하실 수 있습니다.</p>",
+                termsTitle: "서비스 약관",
+                termsContent: "<p>이 무료 도구를 사용함으로써 귀하는 다음에 동의하게 됩니다:</p><ul><li><strong>'있는 그대로' 서비스:</strong> 이 도구는 어떠한 보증도 없이 '있는 그대로' 제공됩니다. 데이터 손실에 대해 책임지지 않습니다.</li><li><strong>책임 없음:</strong> 데이터가 당사로 전송되지 않으므로 당사는 귀하의 데이터에 대해 어떠한 책임도 지지 않습니다.</li></ul>"
+            }
+        };
+
+
+        // --- 2. 全局变量 ---
+        let currentLang = 'en'; 
+        const fileInput = document.getElementById('fileInput');
+        const fileNameDisplay = document.getElementById('fileName');
+        const downloadLink = document.getElementById('downloadLink');
+        const templateDownloadLink = document.getElementById('download-template-link');
+        let currentTemplateBlobUrl = null; 
+        let currentContactCount = 0;
+        
+        // 【新增】模态框 DOM 引用
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalBox = document.getElementById('modal-box');
+        const modalTitle = document.getElementById('modal-title');
+        const modalContent = document.getElementById('modal-content');
+        const modalCloseBtn = document.getElementById('modal-close');
+        const footerNav = document.getElementById('footer-nav');
+
+        // --- 3. 语言切换核心函数 ---
+        
+        function setLanguage(lang) {
+            if (!translations[lang]) {
+                lang = 'en';
+            }
+            currentLang = lang;
+            
+            document.documentElement.lang = lang;
+            const t = translations[lang];
+
+            // 更新 Meta 标签
+            const metaDesc = document.getElementById('meta-description');
+            const metaKeywords = document.getElementById('meta-keywords');
+            if (metaDesc) {
+                metaDesc.setAttribute('content', t.metaDescription);
+            }
+            if (metaKeywords) {
+                metaKeywords.setAttribute('content', t.metaKeywords);
+            }
+
+            // 更新页面可见文本
+            document.title = t.title;
+            document.getElementById('main-title').textContent = t.mainTitle;
+            document.getElementById('subtitle').textContent = t.subtitle;
+            document.getElementById('instructions-title').innerHTML = t.instructionsTitle; 
+            document.getElementById('inst-1').innerHTML = t.inst1;
+            document.getElementById('inst-2').innerHTML = t.inst2;
+            document.getElementById('inst-3').innerHTML = t.inst3;
+            document.getElementById('inst-4').innerHTML = t.inst4;
+            document.getElementById('inst-5').innerHTML = t.inst5;
+            document.getElementById('inst-6').innerHTML = t.inst6;
+            document.getElementById('upload-label').textContent = t.uploadLabel;
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                fileNameDisplay.textContent = t.fileNone;
+            }
+            
+            updateDownloadButtonText(); 
+            generateTemplateLink(t);
+            
+            // 【新增】更新页脚文本
+            document.getElementById('footer-copyright').textContent = t.footerCopyright;
+            document.getElementById('footer-about').textContent = t.footerAbout;
+            document.getElementById('footer-feedback').textContent = t.footerFeedback;
+            document.getElementById('footer-privacy').textContent = t.footerPrivacy;
+            document.getElementById('footer-terms').textContent = t.footerTerms;
+
+
+            document.querySelectorAll('.lang-switcher a').forEach(a => {
+                if (a.getAttribute('data-lang') === lang) {
+                    a.classList.add('active');
+                } else {
+                    a.classList.remove('active');
+                }
+            });
+            
+            try {
+                localStorage.setItem('userLanguage', lang);
+            } catch (e) {
+                console.warn("无法访问 localStorage。语言偏好将不会被保存。");
+            }
+        }
+        
+        // --- 【新增】模态框功能函数 ---
+        
+        /**
+         * 打开模态框并填充内容
+         * @param {string} modalKey - (e.g., 'about', 'privacy')
+         */
+        function openModal(modalKey) {
+            const t = translations[currentLang];
+            const titleKey = `${modalKey}Title`;
+            const contentKey = `${modalKey}Content`;
+            
+            // 检查翻译是否存在
+            if (t[titleKey] && t[contentKey]) {
+                modalTitle.innerHTML = t[titleKey];
+                modalContent.innerHTML = t[contentKey];
+                modalCloseBtn.innerHTML = t.modalClose; // 同时翻译关闭按钮
+                
+                modalOverlay.style.display = 'block';
+                modalBox.style.display = 'block';
+            } else {
+                console.error(`Modal translations not found for key: ${modalKey}`);
+            }
+        }
+        
+        /**
+         * 关闭模态框
+         */
+        function closeModal() {
+            modalOverlay.style.display = 'none';
+            modalBox.style.display = 'none';
+        }
+        
+        // --- (其他 JS 函数未更改) ---
+        
+        function updateDownloadButtonText() {
+            if (currentContactCount > 0) {
+                const t = translations[currentLang];
+                downloadLink.textContent = t.downloadButton.replace('{0}', currentContactCount);
+            }
+        }
+
+        function generateTemplateLink(t) {
+            templateDownloadLink.textContent = t.templateLinkText;
+            const headers = [t.headerName, t.headerPhone, t.headerEmail, t.headerOrg];
+            const exampleData = [
+                ["John Doe", "1234567890", "john.doe@example.com", "Example Inc."],
+                ["Jane Smith", "0987654321", "jane.smith@example.com", "Test Corp"]
+            ];
+            const data = [headers, ...exampleData];
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Contacts"); 
+            const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+            const blob = new Blob([wbout], { type: "application/octet-stream" });
+            if (currentTemplateBlobUrl) {
+                URL.revokeObjectURL(currentTemplateBlobUrl);
+            }
+            currentTemplateBlobUrl = URL.createObjectURL(blob);
+            templateDownloadLink.href = currentTemplateBlobUrl;
+        }
+
+        function initializeLanguage() {
+            let preferredLang = 'en';
+            try {
+                const storedLang = localStorage.getItem('userLanguage');
+                if (storedLang && translations[storedLang]) {
+                    preferredLang = storedLang;
+                } else {
+                    const browserLang = navigator.language.split('-')[0];
+                    if (translations[browserLang]) {
+                        preferredLang = browserLang;
+                    }
+                }
+            } catch (e) {
+                 const browserLang = navigator.language.split('-')[0];
+                 if (translations[browserLang]) {
+                     preferredLang = browserLang;
+                 }
+            }
+            setLanguage(preferredLang);
+        }
+
+        // --- 4. 核心文件处理逻辑 (未更改) ---
+
+        function handleFile(event) {
+            const file = event.target.files[0];
+            const t = translations[currentLang]; 
+
+            if (!file) {
+                fileNameDisplay.textContent = t.fileNone;
+                downloadLink.style.display = 'none';
+                currentContactCount = 0;
+                return;
+            }
+
+            fileNameDisplay.textContent = t.fileSelected.replace('{0}', file.name);
+
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                
+                const vcfContent = generateVCF(jsonData);
+                
+                if (vcfContent) {
+                    const contactCount = (vcfContent.match(/BEGIN:VCARD/g) || []).length;
+                    currentContactCount = contactCount;
+                    createDownloadLink(vcfContent, contactCount);
+                } else {
+                    downloadLink.style.display = 'none';
+                    currentContactCount = 0; 
+                }
+            };
+            
+            reader.onerror = function(e) {
+                console.error("文件读取出错:", e);
+                alert(t.alertReadError);
+                fileNameDisplay.textContent = t.fileNone;
+                downloadLink.style.display = 'none';
+                currentContactCount = 0;
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function generateVCF(data) {
+            let vcfString = "";
+            for (let i = 1; i < data.length; i++) {
+                const row = data[i];
+                if (!row) continue; 
+                const name = row[0];
+                const phone = row[1];
+                const email = row[2];
+                const org = row[3];
+                if (name && name.trim() !== "") {
+                    vcfString += "BEGIN:VCARD\n";
+                    vcfString += "VERSION:3.0\n";
+                    vcfString += `N:${name}\n`;
+                    vcfString += `FN:${name}\n`;
+                    if (phone && phone.toString().trim() !== "") {
+                        vcfString += `TEL;TYPE=CELL:${phone.toString().trim()}\n`;
+                    }
+                    if (email && email.trim() !== "") {
+                        vcfString += `EMAIL:${email.trim()}\n`;
+                    }
+                    if (org && org.trim() !== "") {
+                        vcfString += `ORG:${org.trim()}\n`;
+                    }
+                    vcfString += "END:VCARD\n\n";
+                }
+            }
+            
+            if (vcfString === "") {
+                alert(translations[currentLang].alertNoData);
+                return null;
+            }
+            return vcfString;
+        }
+
+        function createDownloadLink(vcfContent, contactCount) {
+            const blob = new Blob([vcfContent], { type: 'text/vcard;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            
+            downloadLink.href = url;
+            downloadLink.style.display = 'inline-block'; 
+            updateDownloadButtonText();
+        }
+
+        // --- 5. 事件监听器 ---
+        
+        // (现有监听器)
+        fileInput.addEventListener('change', handleFile);
+        
+        document.getElementById('lang-switcher').addEventListener('click', function(e) {
+            if (e.target.tagName === 'A' && e.target.dataset.lang) {
+                e.preventDefault(); 
+                const newLang = e.target.dataset.lang;
+                setLanguage(newLang);
+            }
+        });
+
+        // 【新增】页脚模态框事件监听 (使用事件委托)
+        footerNav.addEventListener('click', function(e) {
+            // 检查点击的是否是带有 data-modal 属性的 <a> 标签
+            if (e.target.tagName === 'A' && e.target.dataset.modal) {
+                e.preventDefault(); // 阻止链接默认的跳转行为
+                const modalKey = e.target.dataset.modal;
+                openModal(modalKey);
+            }
+        });
+        
+        // 【新增】关闭模态框的事件监听
+        modalCloseBtn.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', closeModal); // 点击遮罩层也关闭
+
+        // --- 6. 页面加载时初始化 ---
+        document.addEventListener('DOMContentLoaded', initializeLanguage);
+
+    </script>
+
+</body>
+</html>
