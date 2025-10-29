@@ -180,8 +180,42 @@
             color: #2c3e50;
             background-color: #e0eaf1;
         }
+
+        /* --- 【新增】QR Code 样式 --- */
+        .qr-code-section {
+            
+            text-align: center;
+        }
+        .qr-code-section h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .qr-code-section img {
+            max-width: 180px;
+            width: 100%;
+            height: auto;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+        .qr-code-section p {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            word-break: break-all;
+            margin-bottom: 0;
+        }
+        .qr-code-section a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        .qr-code-section a:hover {
+            text-decoration: underline;
+        }
         
-        /* --- 【新增】页脚样式 --- */
+        /* --- 页脚样式 --- */
         footer {
             flex-shrink: 0; /* 防止页脚收缩 */
             text-align: center;
@@ -205,7 +239,7 @@
             text-decoration: underline;
         }
         
-        /* --- 【新增】模态框 (Modal) 样式 --- */
+        /* --- 模态框 (Modal) 样式 --- */
         #modal-overlay {
             display: none;
             position: fixed;
@@ -243,13 +277,12 @@
         #modal-content p, #modal-content ul {
             margin-bottom: 1rem;
         }
-        /* 突出显示隐私政策中的关键信息 */
         #modal-content strong { 
             color: #c0392b; 
         }
         #modal-close {
-            display: block; /* 使其成为块级元素 */
-            margin: 1.5rem auto 0 auto; /* 顶部外边距，自动水平居中 */
+            display: block;
+            margin: 1.5rem auto 0 auto;
             padding: 10px 25px;
             background: #3498db;
             color: white;
@@ -269,17 +302,17 @@
             body {
                 align-items: flex-start; 
                 padding: 0;
-                justify-content: flex-start; /* 从顶部开始 */
+                justify-content: flex-start;
             }
             
             .main-content {
                 padding: 0;
-                flex-grow: 1; /* 确保内容至少占满一屏 */
+                flex-grow: 1;
             }
 
             .container {
                 width: 100%;
-                min-height: calc(100vh - 80px); /* 减去页脚的大致高度，确保内容填满 */
+                min-height: calc(100vh - 80px);
                 padding: 1.5rem; 
                 border-radius: 0;
                 box-shadow: none;
@@ -294,12 +327,12 @@
             }
             
             footer {
-                padding: 1rem 0.5rem 1.5rem 0.5rem; /* 增加底部 padding */
+                padding: 1rem 0.5rem 1.5rem 0.5rem;
                 font-size: 0.8rem;
             }
             
             #footer-nav {
-                gap: 0.25rem 0.75rem; /* 减小移动端间距 */
+                gap: 0.25rem 0.75rem;
             }
 
             .lang-switcher { font-size: 0.9rem; }
@@ -309,18 +342,17 @@
                 display: inline-block;
             }
             
-            /* 移动端模态框样式 */
             #modal-box {
                 width: 95%;
-                top: auto; /* 移除垂直居中 */
+                top: auto;
                 left: 2.5%;
                 bottom: 2.5%;
-                transform: none; /* 移除 transform */
+                transform: none;
                 max-height: 75vh;
                 padding: 1.5rem;
             }
             #modal-close {
-                width: 100%; /* 关闭按钮在移动端全宽 */
+                width: 100%;
             }
         }
 
@@ -336,7 +368,15 @@
 <body>
 
     <div class="main-content">
+        
         <div class="container">
+            <!-- 【新增】QR Code 模块 -->
+            <div class="qr-code-section">
+                <h3 id="qr-code-title"></h3>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://sehayi.github.io/e2v" alt="QR Code for page URL">
+                <!-- <p><a href="https://sehayi.github.io/e2v" target="_blank">https://sehayi.github.io/e2v</a></p> -->
+            </div>
+            
             <h1 id="main-title"></h1>
             <p id="subtitle"></p>
 
@@ -377,10 +417,11 @@
                 <a href="#" data-lang="ja">日本語</a> &bull;
                 <a href="#" data-lang="ko">한국어</a>
             </div>
+            
+            
+
             <div id="giscus" class="giscus"> </div>
-
         </div>
-
     </div>
 
     <footer>
@@ -397,11 +438,12 @@
     <div id="modal-box">
         <h2 id="modal-title"></h2>
         <div id="modal-content"></div>
-        <button id="modal-close" type="button"></button> </div>
+        <button id="modal-close" type="button"></button> 
+    </div>
 
     
     <script>
-        // --- 1. 翻译词典 (已为所有语言添加页脚和模态框内容) ---
+        // --- 1. 翻译词典 ---
         const translations = {
             'en': {
                 title: "Excel to VCF Converter",
@@ -427,7 +469,7 @@
                 headerPhone: "Mobile Phone",
                 headerEmail: "Email",
                 headerOrg: "Organization",
-                // 新增页脚和模态框翻译
+                qrCodeTitle: "Scan to Open on Your Phone",
                 footerCopyright: "© 2025 Excel2VCF",
                 footerAbout: "About",
                 footerFeedback: "Send Feedback",
@@ -469,7 +511,7 @@
                 headerPhone: "手机号",
                 headerEmail: "电子邮件",
                 headerOrg: "组织/公司",
-                // 新增页脚和模态框翻译
+                qrCodeTitle: "扫描二维码在手机上打开",
                 footerCopyright: "© 2025 Excel2VCF",
                 footerAbout: "关于",
                 footerFeedback: "提供意见",
@@ -511,7 +553,7 @@
                 headerPhone: "Mobiltelefon",
                 headerEmail: "E-Mail",
                 headerOrg: "Organisation",
-                // Neu
+                qrCodeTitle: "Scannen, um auf dem Handy zu öffnen",
                 footerCopyright: "© 2025 Excel2VCF",
                 footerAbout: "Über",
                 footerFeedback: "Feedback senden",
@@ -553,7 +595,7 @@
                 headerPhone: "Teléfono Móvil",
                 headerEmail: "Correo Electrónico",
                 headerOrg: "Organización",
-                // Neu
+                qrCodeTitle: "Escanear para abrir en el móvil",
                 footerCopyright: "© 2025 Excel2VCF",
                 footerAbout: "Acerca de",
                 footerFeedback: "Enviar comentarios",
@@ -595,7 +637,7 @@
                 headerPhone: "Téléphone Portable",
                 headerEmail: "E-mail",
                 headerOrg: "Organisation",
-                // Neu
+                qrCodeTitle: "Scannez pour ouvrir sur votre mobile",
                 footerCopyright: "© 2025 Excel2VCF",
                 footerAbout: "À propos",
                 footerFeedback: "Envoyer des commentaires",
@@ -637,7 +679,7 @@
                 headerPhone: "Cellulare",
                 headerEmail: "Email",
                 headerOrg: "Organizzazione",
-                // Neu
+                qrCodeTitle: "Scansiona per aprire sul cellulare",
                 footerCopyright: "© 2025 Excel2VCF",
                 footerAbout: "Informazioni",
                 footerFeedback: "Invia feedback",
@@ -679,7 +721,7 @@
                 headerPhone: "Mobiele Telefoon",
                 headerEmail: "E-mail",
                 headerOrg: "Organisatie",
-                // Neu
+                qrCodeTitle: "Scan om op uw telefoon te openen",
                 footerCopyright: "© 2025 Excel2VCF",
                 footerAbout: "Over",
                 footerFeedback: "Feedback sturen",
@@ -721,7 +763,7 @@
                 headerPhone: "Telefon komórkowy",
                 headerEmail: "E-mail",
                 headerOrg: "Organizacja",
-                // Neu
+                qrCodeTitle: "Zeskanuj, aby otworzyć na telefonie",
                 footerCopyright: "© 2025 Excel2VCF",
                 footerAbout: "O programie",
                 footerFeedback: "Prześlij opinię",
@@ -763,7 +805,7 @@
                 headerPhone: "Celular",
                 headerEmail: "E-mail",
                 headerOrg: "Organização",
-                // Neu
+                qrCodeTitle: "Digitalize para abrir no seu celular",
                 footerCopyright: "© 2025 Excel2VCF",
                 footerAbout: "Sobre",
                 footerFeedback: "Enviar feedback",
@@ -805,7 +847,7 @@
                 headerPhone: "Мобильный телефон",
                 headerEmail: "Эл. почта",
                 headerOrg: "Организация",
-                // Neu
+                qrCodeTitle: "Сканируйте, чтобы открыть на телефоне",
                 footerCopyright: "© 2025 Excel2VCF",
                 footerAbout: "О проекте",
                 footerFeedback: "Отправить отзыв",
@@ -847,7 +889,7 @@
                 headerPhone: "携帯電話",
                 headerEmail: "Eメール",
                 headerOrg: "組織/会社",
-                // Neu
+                qrCodeTitle: "スキャンして携帯電話で開く",
                 footerCopyright: "© 2025 Excel2VCF",
                 footerAbout: "概要",
                 footerFeedback: "フィードバック",
@@ -889,7 +931,7 @@
                 headerPhone: "휴대폰",
                 headerEmail: "이메일",
                 headerOrg: "조직/회사",
-                // Neu
+                qrCodeTitle: "스캔하여 휴대폰에서 열기",
                 footerCopyright: "© 2025 Excel2VCF",
                 footerAbout: "정보",
                 footerFeedback: "피드백 보내기",
@@ -919,7 +961,6 @@
         let currentTemplateBlobUrl = null; 
         let currentContactCount = 0;
         
-        // 【新增】模态框 DOM 引用
         const modalOverlay = document.getElementById('modal-overlay');
         const modalBox = document.getElementById('modal-box');
         const modalTitle = document.getElementById('modal-title');
@@ -938,7 +979,6 @@
             document.documentElement.lang = lang;
             const t = translations[lang];
 
-            // 更新 Meta 标签
             const metaDesc = document.getElementById('meta-description');
             const metaKeywords = document.getElementById('meta-keywords');
             if (metaDesc) {
@@ -948,7 +988,6 @@
                 metaKeywords.setAttribute('content', t.metaKeywords);
             }
 
-            // 更新页面可见文本
             document.title = t.title;
             document.getElementById('main-title').textContent = t.mainTitle;
             document.getElementById('subtitle').textContent = t.subtitle;
@@ -968,7 +1007,8 @@
             updateDownloadButtonText(); 
             generateTemplateLink(t);
             
-            // 【新增】更新页脚文本
+            // 【新增】更新二维码标题和页脚文本
+            document.getElementById('qr-code-title').textContent = t.qrCodeTitle;
             document.getElementById('footer-copyright').textContent = t.footerCopyright;
             document.getElementById('footer-about').textContent = t.footerAbout;
             document.getElementById('footer-feedback').textContent = t.footerFeedback;
@@ -991,22 +1031,17 @@
             }
         }
         
-        // --- 【新增】模态框功能函数 ---
+        // --- 模态框功能函数 ---
         
-        /**
-         * 打开模态框并填充内容
-         * @param {string} modalKey - (e.g., 'about', 'privacy')
-         */
         function openModal(modalKey) {
             const t = translations[currentLang];
             const titleKey = `${modalKey}Title`;
             const contentKey = `${modalKey}Content`;
             
-            // 检查翻译是否存在
             if (t[titleKey] && t[contentKey]) {
                 modalTitle.innerHTML = t[titleKey];
                 modalContent.innerHTML = t[contentKey];
-                modalCloseBtn.innerHTML = t.modalClose; // 同时翻译关闭按钮
+                modalCloseBtn.innerHTML = t.modalClose;
                 
                 modalOverlay.style.display = 'block';
                 modalBox.style.display = 'block';
@@ -1015,9 +1050,6 @@
             }
         }
         
-        /**
-         * 关闭模态框
-         */
         function closeModal() {
             modalOverlay.style.display = 'none';
             modalBox.style.display = 'none';
@@ -1165,7 +1197,6 @@
 
         // --- 5. 事件监听器 ---
         
-        // (现有监听器)
         fileInput.addEventListener('change', handleFile);
         
         document.getElementById('lang-switcher').addEventListener('click', function(e) {
@@ -1176,25 +1207,22 @@
             }
         });
 
-        // 【新增】页脚模态框事件监听 (使用事件委托)
         footerNav.addEventListener('click', function(e) {
-            // 检查点击的是否是带有 data-modal 属性的 <a> 标签
             if (e.target.tagName === 'A' && e.target.dataset.modal) {
-                e.preventDefault(); // 阻止链接默认的跳转行为
+                e.preventDefault();
                 const modalKey = e.target.dataset.modal;
                 openModal(modalKey);
             }
         });
         
-        // 【新增】关闭模态框的事件监听
         modalCloseBtn.addEventListener('click', closeModal);
-        modalOverlay.addEventListener('click', closeModal); // 点击遮罩层也关闭
+        modalOverlay.addEventListener('click', closeModal);
 
         // --- 6. 页面加载时初始化 ---
         document.addEventListener('DOMContentLoaded', initializeLanguage);
 
     </script>
-    <script src="https://giscus.app/client.js"
+    <!-- <script src="https://giscus.app/client.js"
         data-repo="sehayi/e2v"
         data-repo-id="R_kgDOQLZSew"
         data-category="Q&A"
@@ -1209,6 +1237,6 @@
         data-loading="lazy"
         crossorigin="anonymous"
         async>
-</script>
+</script> -->
 </body>
 </html>
