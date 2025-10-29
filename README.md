@@ -8,9 +8,7 @@
 
 -----
 
-\<a name="en"\>\</a\>
-
-## Excel to VCF Converter (English)
+## Excel to VCF Converter (English) {\#en}
 
 ➡️ **[Try the tool live here](https://your-username.github.io/excel-to-vcf/excel-to-vcf.html)** (替换为您的托管链接)
 
@@ -47,9 +45,7 @@
 
 -----
 
-\<a name="zh"\>\</a\>
-
-## Excel 转换为 VCF (中文)
+## Excel 转换为 VCF (中文) {\#zh}
 
 ➡️ **[点击此处在线体验](https://your-username.github.io/excel-to-vcf/excel-to-vcf.html)** (替换为您的托管链接)
 
@@ -86,9 +82,7 @@
 
 -----
 
-\<a name="de"\>\</a\>
-
-## Excel zu VCF Konverter (Deutsch)
+## Excel zu VCF Konverter (Deutsch) {\#de}
 
 ➡️ **[Testen Sie das Tool hier live](https://your-username.github.io/excel-to-vcf/excel-to-vcf.html)** (Ersetzen Sie dies mit Ihrem Link)
 
@@ -125,9 +119,7 @@
 
 -----
 
-\<a name="es"\>\</a\>
-
-## Convertidor de Excel a VCF (Español)
+## Convertidor de Excel a VCF (Español) {\#es}
 
 ➡️ **[¡Pruébalo en vivo aquí\!](https://your-username.github.io/excel-to-vcf/excel-to-vcf.html)** (Reemplace con su enlace)
 
@@ -164,9 +156,7 @@
 
 -----
 
-\<a name="fr"\>\</a\>
-
-## Convertisseur Excel vers VCF (Français)
+## Convertisseur Excel vers VCF (Français) {\#fr}
 
 ➡️ **[Essayez l'outil en direct ici](https://your-username.github.io/excel-to-vcf/excel-to-vcf.html)** (Remplacez par votre lien)
 
@@ -203,9 +193,7 @@
 
 -----
 
-\<a name="it"\>\</a\>
-
-## Convertitore da Excel a VCF (Italiano)
+## Convertitore da Excel a VCF (Italiano) {\#it}
 
 ➡️ **[Prova lo strumento dal vivo qui](https://your-username.github.io/excel-to-vcf/excel-to-vcf.html)** (Sostituisci con il tuo link)
 
@@ -242,9 +230,7 @@
 
 -----
 
-\<a name="nl"\>\</a\>
-
-## Excel naar VCF Converter (Nederlands)
+## Excel naar VCF Converter (Nederlands) {\#nl}
 
 ➡️ **[Probeer de tool hier live](https://your-username.github.io/excel-to-vcf/excel-to-vcf.html)** (Vervang door uw link)
 
@@ -281,9 +267,7 @@
 
 -----
 
-\<a name="pl"\>\</a\>
-
-## Konwerter Excel do VCF (Polski)
+## Konwerter Excel do VCF (Polski) {\#pl}
 
 ➡️ **[Wypróbuj narzędzie na żywo](https://your-username.github.io/excel-to-vcf/excel-to-vcf.html)** (Zastąp swoim linkiem)
 
@@ -320,9 +304,7 @@
 
 -----
 
-\<a name="pt"\>\</a\>
-
-## Conversor de Excel para VCF (Português)
+## Conversor de Excel para VCF (Português) {\#pt}
 
 ➡️ **[Experimente a ferramenta ao vivo aqui](https://your-username.github.io/excel-to-vcf/excel-to-vcf.html)** (Substitua pelo seu link)
 
@@ -359,9 +341,7 @@
 
 -----
 
-\<a name="ru"\>\</a\>
-
-## Конвертер Excel в VCF (Русский)
+## Конвертер Excel в VCF (Русский) {\#ru}
 
 ➡️ **[Попробовать инструмент онлайн](https://your-username.github.io/excel-to-vcf/excel-to-vcf.html)** (Замените на вашу ссылку)
 
@@ -398,9 +378,7 @@
 
 -----
 
-\<a name="ja"\>\</a\>
-
-## Excel から VCF への変換 (日本語)
+## Excel から VCF への変換 (日本語) {\#ja}
 
 ➡️ **[ここでツールを試す](https://your-username.github.io/excel-to-vcf/excel-to-vcf.html)** (あなたのリンクに置き換えてください)
 
@@ -437,9 +415,7 @@
 
 -----
 
-\<a name="ko"\>\</a\>
-
-## Excel을 VCF로 변환 (한국어)
+## Excel을 VCF로 변환 (한국어) {\#ko}
 
 ➡️ **[여기서 도구 사용해보기](https://your-username.github.io/excel-to-vcf/excel-to-vcf.html)** (사용 중인 링크로 교체하세요)
 
